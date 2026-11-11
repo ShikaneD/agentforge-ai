@@ -1,0 +1,44 @@
+{
+  "name": "AgentForge Codespace",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/AgentForge",
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24"
+    }
+  },
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [5151, 5173],
+  "portsAttributes": {
+    "5151": {
+      "label": "AgentForge API",
+      "visibility": "private",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "AgentForge web",
+      "visibility": "private",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-mssql.mssql",
+        "ms-azuretools.vscode-docker",
+        "dbaeumer.vscode-eslint",
+        "github.codespaces"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "AgentForge.slnx",
+        "files.eol": "\n"
+      }
+    }
+  }
+}

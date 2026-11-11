@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - .env
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+    volumes:
+      - agentforge-codespaces-sql:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/1433'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+  workspace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    env_file:
+        - .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5151
+      Database__Server: db,1433
+    volumes:
+      - ..:/workspaces/AgentForge:cached
+    ports:
+      - "5151:5151"
+      - "5173:5173"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sleep infinity
+
+volumes:
+  agentforge-codespaces-sql:

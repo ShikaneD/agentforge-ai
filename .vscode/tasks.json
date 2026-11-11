@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AgentForge API",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--no-launch-profile",
+        "--project",
+        "src/AgentForge.Api/AgentForge.Api.csproj",
+        "--urls",
+        "http://0.0.0.0:5151"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "agentforge-api",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Building\\.\\.\\.",
+          "endsPattern": "Now listening on:"
+        }
+      }
+    },
+    {
+      "label": "AgentForge web",
+      "type": "process",
+      "command": "npm",
+      "args": [
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "0.0.0.0"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/web"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "agentforge-web",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE v",
+          "endsPattern": "Local:"
+        }
+      }
+    },
+    {
+      "label": "AgentForge full stack",
+      "dependsOn": [
+        "AgentForge API",
+        "AgentForge web"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}
