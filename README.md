@@ -27,6 +27,7 @@ Server installed, and you do not need SSMS.
    builds the workspace and database containers. It generates a unique,
    ignored root `.env` file containing a development-only SQL password; that
    file is not committed.
+   The Codespace workspace includes the .NET 8 SDK in its image.
 3. In the Codespace terminal, start the API and frontend in separate terminals:
 
    ```bash

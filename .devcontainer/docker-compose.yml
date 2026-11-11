@@ -2,7 +2,7 @@ services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     env_file:
-      - .env
+      - ../.env
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Developer
@@ -21,13 +21,13 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     env_file:
-        - .env
+        - ../.env
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:5151
       Database__Server: db,1433
     volumes:
-      - ..:/workspaces/AgentForge:cached
+      - ..:/workspaces/agentforge-ai:cached
     ports:
       - "5151:5151"
       - "5173:5173"
