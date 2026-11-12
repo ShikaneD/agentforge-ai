@@ -91,6 +91,16 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 
+app.MapGet("/", () => TypedResults.Ok(new
+    {
+        service = "AgentForge API",
+        health = "/health",
+        documentation = isDevelopment ? "/swagger" : null
+    }))
+    .WithName("ApiInfo")
+    .WithSummary("Show API entry points")
+    .WithOpenApi();
+
 app.MapGet("/health", () => TypedResults.Ok(new { status = "ok", service = "AgentForge API" }))
     .WithName("Health")
     .WithSummary("Check API liveness")

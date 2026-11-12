@@ -14,6 +14,12 @@ public sealed class ApiSmokeTests
             .WithWebHostBuilder(builder => builder.UseSetting("Database:ApplyMigrations", "false"));
         using var client = application.CreateClient();
 
+        var root = await client.GetAsync("/");
+        Assert.Equal(HttpStatusCode.OK, root.StatusCode);
+        var rootBody = await root.Content.ReadAsStringAsync();
+        Assert.Contains("\"service\":\"AgentForge API\"", rootBody, StringComparison.Ordinal);
+        Assert.Contains("\"health\":\"/health\"", rootBody, StringComparison.Ordinal);
+
         var health = await client.GetAsync("/health");
         Assert.Equal(HttpStatusCode.OK, health.StatusCode);
 

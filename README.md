@@ -138,6 +138,7 @@ Configure outbound MCP servers as `Mcp:Servers:<name>:Url` and remote A2A peers 
 
 ## API overview
 
+- `GET /` (API entry points)
 - `GET /health`
 - `GET|POST /agents`
 - `GET /providers`
