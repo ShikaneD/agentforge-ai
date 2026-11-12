@@ -168,6 +168,7 @@ function App({ displayName = 'Developer' }: { displayName?: string }) {
                 conversation,
                 ...current.filter((item) => item.id !== conversation.id),
               ])}
+              onConversationsChanged={setConversations}
             />
           ) : activeSection === 'Knowledge' ? (
             <KnowledgeWorkspace />

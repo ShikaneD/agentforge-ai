@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { getConversation, sendChat } from './api'
+import { getConversation, getConversations, sendChat } from './api'
 import type { Agent, Conversation } from './types'
 
 interface ChatWorkspaceProps {
   agents: Agent[]
   conversations: Conversation[]
   onConversationCreated: (conversation: Conversation) => void
+  onConversationsChanged: (conversations: Conversation[]) => void
 }
 
-export function ChatWorkspace({ agents, conversations, onConversationCreated }: ChatWorkspaceProps) {
+export function ChatWorkspace({ agents, conversations, onConversationCreated, onConversationsChanged }: ChatWorkspaceProps) {
   const [conversationId, setConversationId] = useState('')
   const [agentId, setAgentId] = useState('')
   const [messages, setMessages] = useState<Conversation['messages']>([])
@@ -17,24 +18,31 @@ export function ChatWorkspace({ agents, conversations, onConversationCreated }: 
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const endOfMessages = useRef<HTMLDivElement>(null)
+  const viewGeneration = useRef(0)
 
   useEffect(() => {
     endOfMessages.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, sending])
 
   async function selectConversation(conversation: Conversation) {
+    const generation = ++viewGeneration.current
     setConversationId(conversation.id)
     if (conversation.agentId) setAgentId(conversation.agentId)
+    setMessages([])
     setLoadingConversation(true)
     setError('')
     try {
       const fullConversation = await getConversation(conversation.id)
-      setMessages(fullConversation.messages)
-      if (fullConversation.agentId) setAgentId(fullConversation.agentId)
+      if (viewGeneration.current === generation) {
+        setMessages(fullConversation.messages)
+        if (fullConversation.agentId) setAgentId(fullConversation.agentId)
+      }
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Could not load conversation.')
+      if (viewGeneration.current === generation) {
+        setError(requestError instanceof Error ? requestError.message : 'Could not load conversation.')
+      }
     } finally {
-      setLoadingConversation(false)
+      if (viewGeneration.current === generation) setLoadingConversation(false)
     }
   }
 
@@ -43,22 +51,17 @@ export function ChatWorkspace({ agents, conversations, onConversationCreated }: 
     const message = draft.trim()
     if (!message || sending) return
 
+    const generation = viewGeneration.current
+    const requestedConversationId = conversationId
     setError('')
     setSending(true)
     try {
       const response = await sendChat({
-        ...(conversationId ? { conversationId } : {}),
+        ...(requestedConversationId ? { conversationId: requestedConversationId } : {}),
         ...(agentId ? { agentId } : {}),
         message,
       })
       const now = new Date().toISOString()
-      setConversationId(response.conversationId)
-      setAgentId(response.agentId)
-      setMessages((current) => [
-        ...current,
-        { id: crypto.randomUUID(), role: 'user', content: message, createdAtUtc: now },
-        { id: crypto.randomUUID(), role: 'assistant', content: response.assistantMessage, sources: response.sources, createdAtUtc: response.createdAtUtc },
-      ])
       onConversationCreated({
         id: response.conversationId,
         agentId: response.agentId,
@@ -66,18 +69,44 @@ export function ChatWorkspace({ agents, conversations, onConversationCreated }: 
         messages: [],
         updatedAtUtc: response.createdAtUtc,
       })
-      setDraft('')
+      if (viewGeneration.current === generation) {
+        setConversationId(response.conversationId)
+        setAgentId(response.agentId)
+        setMessages((current) => [
+          ...current,
+          { id: crypto.randomUUID(), role: 'user', content: message, createdAtUtc: now },
+          { id: crypto.randomUUID(), role: 'assistant', content: response.assistantMessage, sources: response.sources, createdAtUtc: response.createdAtUtc },
+        ])
+        setDraft('')
+      }
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Could not send this message.')
+      if (viewGeneration.current === generation) {
+        setError(requestError instanceof Error ? requestError.message : 'Could not send this message.')
+      }
+      try {
+        if (requestedConversationId) {
+          const persistedConversation = await getConversation(requestedConversationId)
+          onConversationCreated(persistedConversation)
+          if (viewGeneration.current === generation) setMessages(persistedConversation.messages)
+        } else {
+          onConversationsChanged(await getConversations())
+        }
+      } catch {
+        if (viewGeneration.current === generation) {
+          setError((current) => `${current} The conversation history could not be refreshed.`)
+        }
+      }
     } finally {
       setSending(false)
     }
   }
 
   function startNewConversation() {
+    viewGeneration.current += 1
     setConversationId('')
     setMessages([])
     setError('')
+    setLoadingConversation(false)
   }
 
   return (

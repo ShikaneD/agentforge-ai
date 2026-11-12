@@ -109,7 +109,7 @@ public sealed class ConfiguredModelProvider(
         var apiKey = configuration["Models:Gemini:ApiKey"];
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            throw new InvalidOperationException("Gemini is selected but Models:Gemini:ApiKey is not configured.");
+            throw new ModelProviderConfigurationException("Gemini is selected but Models:Gemini:ApiKey is not configured.");
         }
 
         return new
