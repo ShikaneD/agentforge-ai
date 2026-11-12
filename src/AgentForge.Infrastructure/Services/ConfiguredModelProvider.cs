@@ -41,7 +41,7 @@ public sealed class ConfiguredModelProvider(
             };
             if (Name == "OpenAI")
             {
-                var apiKey = configuration["Models:OpenAI:ApiKey"];
+                var apiKey = GetApiKey();
                 if (string.IsNullOrWhiteSpace(apiKey))
                 {
                     throw new ModelProviderConfigurationException("OpenAI credentials are not configured.");
@@ -51,7 +51,7 @@ public sealed class ConfiguredModelProvider(
             }
             else if (Name == "Gemini")
             {
-                var apiKey = configuration["Models:Gemini:ApiKey"];
+                var apiKey = GetApiKey();
                 if (string.IsNullOrWhiteSpace(apiKey))
                 {
                     throw new ModelProviderConfigurationException("Gemini credentials are not configured.");
@@ -106,7 +106,7 @@ public sealed class ConfiguredModelProvider(
 
     private object BuildGeminiRequest(ModelCompletionRequest request)
     {
-        var apiKey = configuration["Models:Gemini:ApiKey"];
+        var apiKey = GetApiKey();
         if (string.IsNullOrWhiteSpace(apiKey))
         {
             throw new ModelProviderConfigurationException("Gemini is selected but Models:Gemini:ApiKey is not configured.");
@@ -122,6 +122,23 @@ public sealed class ConfiguredModelProvider(
             }),
             generationConfig = request.RequireJson ? new { responseMimeType = "application/json" } : null
         };
+    }
+
+    private string? GetApiKey()
+    {
+        var configuredKey = configuration[$"Models:{Name}:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(configuredKey))
+        {
+            return configuredKey;
+        }
+
+        var environmentKey = Name switch
+        {
+            "Gemini" => configuration["GEMINI_API_KEY"],
+            "OpenAI" => configuration["OPENAI_API_KEY"],
+            _ => null
+        };
+        return string.IsNullOrWhiteSpace(environmentKey) ? null : environmentKey;
     }
 
     private static object BuildOpenAiRequest(ModelCompletionRequest request)

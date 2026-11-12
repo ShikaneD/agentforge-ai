@@ -51,6 +51,8 @@ Server installed, and you do not need SSMS.
    ```
 
    Add `GEMINI_API_KEY` as a Codespaces secret before creating the Codespace.
+   The API also reads `GEMINI_API_KEY` and `OPENAI_API_KEY` directly when set
+   in its environment, so restart the API after changing a Codespaces secret.
    Alternatively, Ollama can be configured if a reachable Ollama service is
    available. Do not paste credentials into source files or commit `.env`.
 
