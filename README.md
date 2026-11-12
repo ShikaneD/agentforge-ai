@@ -54,6 +54,8 @@ Server installed, and you do not need SSMS.
    Add `GEMINI_API_KEY` as a Codespaces secret before creating the Codespace.
    The guard prevents saving an empty key when the Codespace has not received
    the secret.
+   The default Gemini model is `gemini-3.5-flash-lite`; existing overrides in
+   `Models:Gemini:Model` should use a model enabled for the key's project.
    The API also reads `GEMINI_API_KEY` and `OPENAI_API_KEY` directly when set
    in its environment, so restart the API after changing a Codespaces secret.
    Alternatively, Ollama can be configured if a reachable Ollama service is

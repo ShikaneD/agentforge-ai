@@ -16,7 +16,7 @@ public sealed class ConfiguredModelProvider(
     public string Name { get; } = name;
     public string DefaultModel => configuration[$"Models:{Name}:Model"] ?? Name switch
     {
-        "Gemini" => "gemini-2.5-flash",
+        "Gemini" => "gemini-3.5-flash-lite",
         "OpenAI" => "gpt-4o-mini",
         "Ollama" => "llama3.2",
         _ => throw new InvalidOperationException($"Model provider '{Name}' is not supported.")

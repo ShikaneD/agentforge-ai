@@ -15,7 +15,7 @@ public sealed class ConfiguredModelProviderTests
         using var httpClient = new HttpClient(new UnusedHttpMessageHandler());
         var provider = new ConfiguredModelProvider("Gemini", httpClient, configuration);
         var request = new ModelCompletionRequest(
-            "gemini-2.5-flash",
+            "gemini-3.5-flash-lite",
             "system prompt",
             [new ModelMessage("user", "Hello")],
             true);
@@ -39,7 +39,7 @@ public sealed class ConfiguredModelProviderTests
         using var httpClient = new HttpClient(handler);
         var provider = new ConfiguredModelProvider("Gemini", httpClient, configuration);
         var request = new ModelCompletionRequest(
-            "gemini-2.5-flash",
+            "gemini-3.5-flash-lite",
             "system prompt",
             [new ModelMessage("user", "Hello")],
             true);
@@ -48,6 +48,16 @@ public sealed class ConfiguredModelProviderTests
 
         Assert.Equal("{\"message\":\"Hello\"}", response);
         Assert.Equal("test-api-key", handler.ApiKey);
+    }
+
+    [Fact]
+    public void DefaultModel_UsesCurrentGeminiFlashLiteModel()
+    {
+        var configuration = new ConfigurationBuilder().Build();
+        using var httpClient = new HttpClient(new UnusedHttpMessageHandler());
+        var provider = new ConfiguredModelProvider("Gemini", httpClient, configuration);
+
+        Assert.Equal("gemini-3.5-flash-lite", provider.DefaultModel);
     }
 
     private sealed class UnusedHttpMessageHandler : HttpMessageHandler
