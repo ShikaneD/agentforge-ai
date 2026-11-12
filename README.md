@@ -46,11 +46,14 @@ Server installed, and you do not need SSMS.
    secrets, then map them into .NET user-secrets inside the Codespace:
 
    ```bash
+   test -n "${GEMINI_API_KEY:-}" || { echo "GEMINI_API_KEY is missing from this Codespace"; exit 1; }
    dotnet user-secrets init --project src/AgentForge.Api/AgentForge.Api.csproj
    dotnet user-secrets set "Models:Gemini:ApiKey" "$GEMINI_API_KEY" --project src/AgentForge.Api/AgentForge.Api.csproj
    ```
 
    Add `GEMINI_API_KEY` as a Codespaces secret before creating the Codespace.
+   The guard prevents saving an empty key when the Codespace has not received
+   the secret.
    The API also reads `GEMINI_API_KEY` and `OPENAI_API_KEY` directly when set
    in its environment, so restart the API after changing a Codespaces secret.
    Alternatively, Ollama can be configured if a reachable Ollama service is
